@@ -491,6 +491,18 @@ void AudioEngineImpl::update(float dt)
     }
 }
 
+void AudioEngineImpl::cache(const std::string &filePath)
+{
+    AudioCache* audioCache = nullptr;
+    auto it = _audioCaches.find(filePath);
+    if (it == _audioCaches.end()) {
+        audioCache = &_audioCaches[filePath];
+        audioCache->_fileFullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+        
+        _threadPool->addTask(std::bind(&AudioCache::readDataTask, audioCache));
+    }
+}
+
 void AudioEngineImpl::uncache(const std::string &filePath)
 {
     _audioCaches.erase(filePath);

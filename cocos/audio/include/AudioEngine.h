@@ -186,6 +186,11 @@ public:
     
     static bool setMaxAudioInstance(int maxInstances);
     
+    /** Cache the audio data to avoid delays when playing sound for the first time.
+     * @param filePath The path of an audio file
+     */
+    static void cache(const std::string& filePath);
+
     /** Uncache the audio data from internal buffer.
      * AudioEngine cache audio data on ios platform
      * @warning This can lead to stop related audio first.

@@ -258,6 +258,20 @@ void AudioEngine::stopAll()
     _audioIDInfoMap.clear();
 }
 
+void AudioEngine::cache(const std::string &filePath)
+{
+    if ( !lazyInit() ){
+        return;
+    }
+    if ( !FileUtils::getInstance()->isFileExist(filePath)){
+        return;
+    }
+    
+    if (_audioEngineImpl){
+        _audioEngineImpl->cache(filePath);
+    }
+}
+
 void AudioEngine::uncache(const std::string &filePath)
 {
     if(_audioPathIDMap.find(filePath) != _audioPathIDMap.end()){
