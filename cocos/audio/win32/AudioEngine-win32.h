@@ -59,6 +59,7 @@ public:
     bool setCurrentTime(int audioID, float time);
     void setFinishCallback(int audioID, const std::function<void (int, const std::string &)> &callback);
     
+    void cache(const std::string& filePath);
     void uncache(const std::string& filePath);
     void uncacheAll();
     

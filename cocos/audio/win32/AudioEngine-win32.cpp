@@ -517,6 +517,50 @@ void AudioEngineImpl::update(float dt)
     }
 }
 
+void AudioEngineImpl::cache(const std::string &filePath)
+{
+    AudioCache* audioCache = nullptr;
+    auto it = _audioCaches.find(filePath);
+    if (it == _audioCaches.end()) {
+        audioCache = &_audioCaches[filePath];
+
+        auto ext = filePath.substr(filePath.rfind('.'));
+        transform(ext.begin(), ext.end(), ext.begin(), tolower);
+
+        bool eraseCache = true;
+        if (ext.compare(".ogg") == 0){
+            audioCache->_fileFormat = AudioCache::FileFormat::OGG;
+            eraseCache = false;
+        }
+        else if (ext.compare(".mp3") == 0){
+            audioCache->_fileFormat = AudioCache::FileFormat::MP3;
+
+            if (MPG123_LAZYINIT){
+                auto error = mpg123_init();
+                if (error == MPG123_OK){
+                    MPG123_LAZYINIT = false;
+                    eraseCache = false;
+                }
+                else{
+                    log("Basic setup goes wrong: %s", mpg123_plain_strerror(error));
+                }
+            }
+            else{
+                eraseCache = false;
+            }
+        }
+        else{
+            log("unsupported media type:%s\n", ext.c_str());
+        }
+
+        if (eraseCache){
+            _audioCaches.erase(filePath);
+        }
+        audioCache->_fileFullPath = FileUtils::getInstance()->fullPathForFilename(filePath);
+        _threadPool->addTask(std::bind(&AudioCache::readDataTask, audioCache));
+    }
+}
+
 void AudioEngineImpl::uncache(const std::string &filePath)
 {
     _audioCaches.erase(filePath);
